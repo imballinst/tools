@@ -1,0 +1,55 @@
+---
+import Alpine from 'alpinejs'
+ 
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+const { url } = Astro.request
+const { pathname } = new URL(url)
+
+const PATHS = [
+	{
+		text: "Home",
+		href: "/"
+	},
+	{
+		text: "Jira",
+		href: "/jira"
+	},
+]
+
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Astro description" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<nav class="bg-slate-300 px-4 py-2">
+			<ul class="flex gap-x-2">
+				{PATHS.map(item => (
+					<li>
+						<a href={item.href} class:list={[ "hover:underline", { "font-semibold": pathname === item.href } ]}>
+							{item.text}
+						</a>
+					</li>
+				))}
+			</ul>
+		</nav>
+		<main class="p-4">
+			<slot />
+		</main>
+	</body>
+</html>
+
+<script>	
+	Alpine.start()
+</script>
