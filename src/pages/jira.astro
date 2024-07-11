@@ -1,7 +1,102 @@
 ---
 import Layout from '../layouts/Layout.astro';
+
+const xData = `{
+	csvInput: '',
+
+	csvOutput: '',
+
+	get getCsvOutput() {
+		const sprintToPriorityRecord = {}
+		const sprintToSectionRecord = {}
+
+		const columnsToWatch = []
+		const lines = this.csvInput.split('\n')
+		const sectionColumnIndices = []
+		let sprintColumn = -1
+		let priorityColumn = -1
+
+		const headers = lines[0]
+		const body = lines.slice(1)
+
+		for (let i = 0; i < headers.length; i++) {
+			switch (headers[i]) {
+				case "Priority": {
+					priorityColumn = i
+					break
+				}
+				case "Custom field (Section / Feature)": {
+					sectionColumnIndices.push(i)
+					break
+				}
+				case "Sprint": {
+					sprintColumn = i
+					break
+				}
+			}
+		}
+		
+		for (let i = 0; i < body.length; i++) {
+			let priorityRecord = sprintToPriorityRecord[sprintColumn]
+			let sectionRecord = sprintToPriorityRecord[sprintColumn]
+
+			if (!priorityRecord) {
+				priorityRecord = {}
+				sprintToPriorityRecord[sprintColumn] = priorityRecord
+			}
+
+			if (!sectionRecord) {
+				sectionRecord = {}
+				sprintToSectionRecord[sprintColumn] = sectionRecord
+			}
+
+			const row = body[i]
+			const priority = row[priorityColumn]
+			
+
+			if (!priorityRecord[priority]) {
+				priorityRecord[priority] = 0
+			}
+
+			priorityRecord[priority]++
+
+			for (const sectionColumnIndex of sectionColumnIndices) {
+				const section = row[sectionColumnIndex]
+				if (!sectionRecord[section]) {
+					sectionRecord[section] = 0
+				}
+
+				sectionRecord[section]++
+			}
+		}
+		
+		return { sprintToPriorityRecord, sprintToSectionRecord }
+	}
+}`
 ---
 
 <Layout title="Welcome to Astro.">
 	<h1 x-data="{ message: 'I ❤️ Alpine' }" x-text="message"></h1>
+
+	<div x-data={xData} class="flex flex-col gap-y-2">
+		<textarea x-model="csvInput" class="border" />
+		
+		<p x-text="csvInput"></p>
+		
+		<textarea x-model="csvOutput" class="border">
+			
+		<!-- <p x-text="getCsvOutput"></p> -->
+	</div>
 </Layout>
+
+<script>
+	document.addEventListener('alpine:init', () => {
+			Alpine.data('dropdown', () => ({
+					open: false,
+
+					toggle() {
+							this.open = ! this.open
+					}
+			}))
+	})
+</script>
