@@ -1,6 +1,4 @@
 ---
-import Alpine from 'alpinejs'
- 
 interface Props {
 	title: string;
 }
@@ -29,6 +27,10 @@ const PATHS = [
 		<meta name="description" content="Astro description" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
@@ -50,3 +52,25 @@ const PATHS = [
 	</body>
 </html>
 
+<style is:global>
+	html, body {
+		font-family: "Inter", sans-serif;
+		font-optical-sizing: auto;
+		font-weight: <weight>;
+		font-style: normal;
+		font-variation-settings:
+			"slnt" 0;
+	}
+
+	h1 {
+		@apply text-2xl font-bold mb-4;
+	}
+
+	input[type="text"], textarea {
+		@apply rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6
+	}
+
+	label {
+		@apply text-sm font-medium leading-6 text-gray-900;
+	}
+</style>
