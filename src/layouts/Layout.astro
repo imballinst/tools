@@ -7,7 +7,7 @@ const { title } = Astro.props;
 const { url } = Astro.request
 const { pathname } = new URL(url)
 
-const BASE_PATH = import.meta.env.BASE_PATH || '/'
+const BASE_PATH = import.meta.env.BASE_PATH || ''
 
 const PATHS = [
 	{
@@ -16,7 +16,7 @@ const PATHS = [
 	},
 	{
 		text: "Jira",
-		href: `${BASE_PATH}jira`
+		href: `${BASE_PATH}/jira`
 	},
 ]
 
