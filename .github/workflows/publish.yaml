@@ -25,7 +25,7 @@ jobs:
       - name: Build
         run: yarn && yarn build
         env:
-          BASE_PATH: tools
+          BASE_PATH: /tools
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
