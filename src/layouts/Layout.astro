@@ -3,14 +3,15 @@ interface Props {
 	title: string;
 }
 
-console.info(import.meta.env)
-
 const basePath = import.meta.env.BASE_PATH || '/'
 const commitHash = import.meta.env.COMMIT_HASH || 'dev'
 
 const { title } = Astro.props;
 const { url } = Astro.request
 const { pathname } = new URL(url)
+
+const trimTrailingSlash = (val: string) => val.endsWith('/') ? val.slice(0, -1) : val
+const isPathSame = (p1: string, p2: string) => trimTrailingSlash(p1) === trimTrailingSlash(p2)
 
 const paths = [
 	{
@@ -49,7 +50,7 @@ for (const p of paths) {
 			<ul class="flex gap-x-2">
 				{paths.map(item => (
 					<li>
-						<a href={item.href} class:list={[ "hover:underline", { "font-semibold": pathname === item.href } ]}>
+						<a href={item.href} class:list={[ "hover:underline", { "font-semibold": isPathSame(pathname, item.href) } ]}>
 							{item.text}
 						</a>
 					</li>
