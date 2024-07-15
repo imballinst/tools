@@ -217,17 +217,17 @@ function OutputSection({
 }) {
   return (
     <section className="flex flex-col gap-y-2">
-      <h3 className="text-base font-semibold flex gap-x-2 items-center">
-        {title}
+      <h3 className="text-base font-semibold flex gap-x-2 items-center">{title}</h3>
 
+      <div className="flex gap-x-2">
         <CopyButton content={content}>Copy CSV table</CopyButton>
 
         {formula && <CopyButton content={formula}>Copy formula</CopyButton>}
-      </h3>
+      </div>
 
-      <pre className="border p-2 max-h-[100px] overflow-y-auto text-sm">{content}</pre>
+      <pre className="border p-2 pb-1 line-clamp-4">{content}</pre>
 
-      {formula && <pre className="border p-2 max-h-[100px] overflow-y-auto text-sm">{formula}</pre>}
+      {formula && <pre className="border p-2 text-sm">{formula}</pre>}
     </section>
   )
 }
