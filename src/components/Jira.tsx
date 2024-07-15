@@ -225,7 +225,7 @@ function OutputSection({
         {formula && <CopyButton content={formula}>Copy formula</CopyButton>}
       </div>
 
-      <pre className="border p-2 pb-1 line-clamp-4">{content}</pre>
+      <pre className="border p-2 pb-1 text-sm line-clamp-4">{content}</pre>
 
       {formula && <pre className="border p-2 text-sm">{formula}</pre>}
     </section>
