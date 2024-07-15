@@ -3,7 +3,10 @@ interface Props {
 	title: string;
 }
 
-const basePath = import.meta.env.basePath || '/'
+console.info(import.meta.env)
+
+const basePath = import.meta.env.BASE_PATH || '/'
+const commitHash = import.meta.env.COMMIT_HASH || 'dev'
 
 const { title } = Astro.props;
 const { url } = Astro.request
@@ -16,11 +19,12 @@ const paths = [
 	},
 	{
 		text: "Jira",
-		href: `${basePath}/jira/`
+		href: `${basePath}/jira`
 	},
 ]
 
 for (const p of paths) {
+	p.href += '/'
 	p.href = p.href.replace(/\/{1,}/g, '/')
 }
 
@@ -40,8 +44,8 @@ for (const p of paths) {
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body>
-		<nav class="bg-slate-300 px-4 py-2">
+	<body class="flex flex-col">
+		<nav class="bg-slate-100 px-4 py-2">
 			<ul class="flex gap-x-2">
 				{paths.map(item => (
 					<li>
@@ -52,9 +56,14 @@ for (const p of paths) {
 				))}
 			</ul>
 		</nav>
-		<main class="p-4">
+		
+		<main class="p-4 flex flex-1 flex-col">
 			<slot />
 		</main>
+
+		<footer class="bg-slate-100 text-center text-xs py-2">
+			Build <span class="font-bold">{commitHash}</span>
+		</footer>
 	</body>
 </html>
 
@@ -66,6 +75,8 @@ for (const p of paths) {
 		font-style: normal;
 		font-variation-settings:
 			"slnt" 0;
+
+		height: 100%;
 	}
 
 	h1 {

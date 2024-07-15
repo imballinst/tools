@@ -23,7 +23,7 @@ jobs:
           cache: yarn
 
       - name: Build
-        run: yarn && yarn build
+        run: yarn && COMMIT_HASH=$(git rev-parse --short HEAD) yarn build
         env:
           BASE_PATH: /tools
 
