@@ -2041,6 +2041,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"csv-stringify@npm:6.5.0":
+  version: 6.5.0
+  resolution: "csv-stringify@npm:6.5.0"
+  checksum: 10c0/838f793d28458fcaf2bc84ac7d33e918792a7ea004ffbffbb9553e7d0e9de46ef7e2b306096f8299634561e2b78b808299c4aa629943ff96d65375c6e03194b8
+  languageName: node
+  linkType: hard
+
 "debug@npm:4, debug@npm:^4.0.0, debug@npm:^4.1.0, debug@npm:^4.3.1, debug@npm:^4.3.4, debug@npm:^4.3.5":
   version: 4.3.5
   resolution: "debug@npm:4.3.5"
@@ -5274,6 +5281,7 @@ __metadata:
     "@types/lodash": "npm:4.17.6"
     astro: "npm:4.11.5"
     csv-parse: "npm:5.5.6"
+    csv-stringify: "npm:6.5.0"
     lodash: "npm:4.17.21"
     preact: "npm:10.22.1"
     prettier: "npm:3.3.2"
