@@ -217,7 +217,8 @@ function processOutput(input: string) {
       column: sectionCsvColumn,
       dataLength: content.length,
       sprintCsvColumn,
-      startRow: sectionRowStart
+      startRow: sectionRowStart,
+      isMultiple: true
     })
   }
 }
@@ -334,19 +335,27 @@ function getFormula({
   column,
   dataLength,
   sprintCsvColumn,
-  startRow
+  startRow,
+  isMultiple
 }: {
   column: string
   sprintCsvColumn: string
   dataLength: number
   startRow: number
+  isMultiple?: boolean
 }) {
   const dataLengthWithHeader = dataLength + 1
+  let formulaCriteria = `$A${startRow + 1}`
+
+  if (isMultiple) {
+    formulaCriteria = `"*[" & ${formulaCriteria} & "]*"`
+  }
+
   const columns = [
     // Data source.
     `$${column}$2:$${column}$${dataLengthWithHeader}`,
     // Criteria.
-    `"*[" & $A${startRow + 1} & "]*"`,
+    formulaCriteria,
     // Sprint data source.
     `$${sprintCsvColumn}$2:$${sprintCsvColumn}$${dataLengthWithHeader}`,
     // Criteria.
