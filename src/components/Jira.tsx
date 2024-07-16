@@ -1,4 +1,4 @@
-import { signal } from '@preact/signals'
+import { effect, signal } from '@preact/signals'
 import debounce from 'lodash/debounce'
 import { parse } from 'csv-parse/browser/esm/sync'
 import { stringify } from 'csv-stringify/browser/esm/sync'
@@ -8,12 +8,29 @@ import type { ReactNode } from 'preact/compat'
 const HEADER_PADDING = 2
 // The char code for "A". Used for determining the "A" column.
 const A_CHAR_CODE = 65
+const LOCAL_STORAGE_KEY = 'initial_values'
 
 const csvInput = signal(getInitialCsvInput())
-const sprintKeyInput = signal('Sprint')
-const sectionKeyInput = signal('Custom field (Section / Feature)')
-const priorityKeyInput = signal('Priority')
-const priorityListInput = signal('P0,P1,P2,P3,P4')
+const initialValues = getInitialValue(LOCAL_STORAGE_KEY, {
+  sprintKeyInput: 'Custom field (Version or Sprint when issue is found)',
+  sectionKeyInput: 'Custom field (Section / Feature)',
+  priorityKeyInput: 'Priority',
+  priorityListInput: 'P0,P1,P2,P3,P4'
+})
+
+const sprintKeyInput = signal(initialValues.sprintKeyInput)
+const sectionKeyInput = signal(initialValues.sectionKeyInput)
+const priorityKeyInput = signal(initialValues.priorityKeyInput)
+const priorityListInput = signal(initialValues.priorityListInput)
+
+effect(() => {
+  setInitialValue(LOCAL_STORAGE_KEY, {
+    sprintKeyInput: sprintKeyInput.value,
+    sectionKeyInput: sectionKeyInput.value,
+    priorityKeyInput: priorityKeyInput.value,
+    priorityListInput: priorityListInput.value
+  })
+})
 
 const csvOutput = signal<Record<string, string>>({})
 
@@ -146,7 +163,14 @@ function processOutput(input: string) {
     columns: true,
     group_columns_by_name: true,
     skip_empty_lines: true
-  })
+  }).map((item: any) => ({
+    ...item,
+    [sectionKeyInput.value]: (item[sectionKeyInput.value] ?? [])
+      .filter(Boolean)
+      .map((val: any) => `[${val}]`)
+      .join(', '),
+    [sprintKeyInput.value]: (item[sprintKeyInput.value] ?? []).filter(Boolean).join(', ')
+  }))
 
   for (let i = 0; i < content.length; i++) {
     const row = content[i]
@@ -154,11 +178,9 @@ function processOutput(input: string) {
 
     sprintSet.add(sprintName)
 
-    const sections = row[sectionKeyInput.value]
+    const sections = row[sectionKeyInput.value].split(', ')
     for (const section of sections) {
-      if (!section) continue
-
-      sectionSet.add(section)
+      sectionSet.add(section.replace(/[\[\]]/g, ''))
     }
   }
 
@@ -178,13 +200,7 @@ function processOutput(input: string) {
   const sectionCsvColumn = getCsvColumnLetter(keys, sectionKeyInput.value)
 
   csvOutput.value = {
-    content: stringify(
-      content.map((item: any) => ({
-        ...item,
-        [sectionKeyInput.value]: item[sectionKeyInput.value].filter(Boolean).join(', ')
-      })),
-      { header: true }
-    ),
+    content: stringify(content, { header: true }),
 
     csvSprintToPriorityRecord: renderPriorityCsv(sprintKeys),
 
@@ -282,29 +298,35 @@ function renderSprintHeaders(sprintKeys: string[]) {
 
 function getInitialCsvInput() {
   return `
-Issue key,Issue id,Priority,Summary,Status,Custom field (Section / Feature),Custom field (Section / Feature),Custom field (Section / Feature),Sprint
-XDD-1,1,P2,Test Summary 1,Done,Repositories,,,Helloworld v1.24
-XDD-2,2,P2,Test Summary 2,Done,Repositories,,,Helloworld v1.24
-XDD-3,3,P0,Test Summary 3,Done,Authentication,,,Helloworld v1.24
-XDD-4,4,P2,Test Summary 4,Done,Authorization,,,Helloworld v1.24
-XDD-5,5,P2,Test Summary 5,Done,Authorization,,,Helloworld v1.24
-XDD-6,6,P2,Test Summary 6,Done,Commits,,,Helloworld v1.24
-XDD-7,7,P3,Test Summary 7,Done,Feature Flag,,,Helloworld v1.24
-XDD-8,8,P3,Test Summary 8,Done,Pull Requests,,,Helloworld v1.24
-XDD-9,9,P3,Test Summary 9,Done,Authorization,Issues,Commits,Helloworld v1.24
-XDD-10,10,P1,Test Summary 10,Done,Authorization,,,Helloworld v1.24
-XDD-11,11,P1,Test Summary 11,Done,Issues,,,Helloworld v1.24
-XDD-12,12,P2,Test Summary 12,Done,Repositories,,,Helloworld v1.24
-XDD-13,13,P1,Test Summary 13,Done,Repositories,,,Helloworld v1.24
-XDD-14,14,P2,Test Summary 14,Done,Repositories,,,Helloworld v1.24
-XDD-15,15,P2,Test Summary 15,Done,Repositories,,,Helloworld v1.24
-XDD-16,16,P2,Test Summary 16,Done,Repositories,,,Helloworld v1.24
-XDD-17,17,P3,Test Summary 17,Done,Issues,,,Helloworld v1.23
-XDD-18,18,P2,Test Summary 18,Done,Commits,,,Helloworld v1.23
-XDD-19,19,P2,Test Summary 19,Done,Commits,,,Helloworld v1.23
-XDD-20,20,P3,Test Summary 20,Done,Issues,,,Helloworld v1.24
-XDD-21,21,P3,Test Summary 21,Done,Issues,,,Helloworld v1.24
-XDD-22,22,P3,Test Summary 22,Done,Issues,,,Helloworld v1.24  
+Issue key,Issue id,Priority,Summary,Status,Custom field (Section / Feature),Custom field (Section / Feature),Custom field (Section / Feature),Custom field (Section / Feature),Sprint,Sprint,Custom field (Version or Sprint when issue is found),Custom field (Version or Sprint when issue is found),Custom field (Version or Sprint when issue is found)
+XDD-844,229503,P3,Test Summary 1,To Do,Repository,,,,Backlog,,1.26,,
+XDD-842,229382,P2,Test Summary 2,Done,Repository,,,,Test Sprint - 1.26,,1.26,,
+XDD-841,229381,P2,Test Summary 3,Done,Commit,,,,Test Sprint - 1.26,,1.26,,
+XDD-840,229376,P2,Test Summary 4,Done,Commit,,,,Test Sprint - 1.26,,1.26,,
+XDD-839,229374,P2,Test Summary 5,REVIEW,Commit,,,,Test Sprint - 1.26,,1.26,,
+XDD-837,229310,P2,Test Summary 6,Done,Pull Request,,,,Test Sprint - 1.26,,1.26,,
+XDD-833,228926,P3,Test Summary 7,To Do,Commit,,,,Test Sprint - 1.26,,1.26,,
+XDD-832,228925,P3,Test Summary 8,To Do,Commit,,,,Test Sprint - 1.26,,1.26,,
+XDD-831,228915,P2,Test Summary 9,Done,Commit,,,,Test Sprint - 1.26,,1.26,,
+XDD-830,228896,P2,Test Summary 10,Done,Commit,Authentication,Repository,Pull Request,Test Sprint - 1.26,,1.26,,
+XDD-829,228885,P3,Test Summary 11,Done,Commit,,,,Test Sprint - 1.26,,1.26,,
+XDD-828,228836,P2,Test Summary 12,Done,Commit,Authentication,Repository,Pull Request,Test Sprint - 1.26,,1.26,,
+XDD-825,228329,P2,Test Summary 13,Done,Commit,,,,Test Sprint - 1.26,,1.26,,
+XDD-824,228206,P2,Test Summary 14,Done,Commit,,,,Test Sprint - 1.26,,1.26,,
+XDD-823,228205,P2,Test Summary 15,Done,Commit,,,,Test Sprint - 1.26,,1.26,,
+XDD-813,226532,P2,Test Summary 16,Done,Commit,,,,Test Sprint - 1.26,,1.26,,
+XDD-811,226263,P2,Test Summary 17,Done,Commit,Repository,Pull Request,Users,Test Sprint - 1.25,,1.25,,
+XDD-799,225879,P3,Test Summary 18,To Do,Authorization,,,,Backlog,,1.25,,
+XDD-787,225080,P3,Test Summary 19,To Do,Authorization,,,,Backlog,,1.25,,
+XDD-783,224572,P3,Test Summary 20,To Do,Authorization,,,,Backlog,,1.25,,
+XDD-781,224495,P2,Test Summary 21,REVIEW,Authentication,,,,Test Sprint - 1.25,Test Sprint - 1.26,1.25,,
+XDD-772,223123,P3,Test Summary 22,To Do,Authentication,,,,Backlog,,1.24,,
+XDD-770,223119,P3,Test Summary 23,To Do,Users,,,,Backlog,,1.24,,
+XDD-769,223115,P3,Test Summary 24,To Do,Users,,,,Backlog,,1.24,,
+XDD-768,223113,P2,Test Summary 25,Done,Commit,,,,Test Sprint - 1.24,Test Sprint - 1.25,1.24,,
+XDD-767,223103,P2,Test Summary 26,Done,Commit,,,,Test Sprint - 1.24,Test Sprint - 1.25,1.25,,
+XDD-766,223101,P2,Test Summary 27,Done,Pull Request,,,,Test Sprint - 1.24,Test Sprint - 1.25,1.24,,
+XDD-765,222979,P3,Test Summary 28,To Do,Repository,,,,Backlog,,1.24,,
 `.trim()
 }
 
@@ -324,7 +346,7 @@ function getFormula({
     // Data source.
     `$${column}$2:$${column}$${dataLengthWithHeader}`,
     // Criteria.
-    `$A${startRow + 1}`,
+    `"*[" & $A${startRow + 1} & "]*"`,
     // Sprint data source.
     `$${sprintCsvColumn}$2:$${sprintCsvColumn}$${dataLengthWithHeader}`,
     // Criteria.
@@ -336,4 +358,22 @@ function getFormula({
 
 function getCsvColumnLetter(columns: string[], columnName: string) {
   return String.fromCharCode(A_CHAR_CODE + columns.findIndex((column) => column === columnName))
+}
+
+function getInitialValue<RecordType extends Record<string, string>>(
+  key: string,
+  initialValue: RecordType
+): RecordType {
+  if (typeof window !== 'undefined') {
+    const value = window.localStorage.getItem(key)
+    return value ? JSON.parse(value) : initialValue
+  }
+
+  return initialValue
+}
+
+function setInitialValue(key: string, value: Record<string, string>) {
+  if (typeof window === 'undefined') return
+
+  return window.localStorage.setItem(key, JSON.stringify(value))
 }
