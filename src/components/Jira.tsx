@@ -47,8 +47,9 @@ export function JiraForm() {
           <li>Extract the selected tickets from Jira as CSV.</li>
           <li>Copy the values to the "CSV" input and adjust the column names as needed.</li>
           <li>
-            Copy the CSV outputs that you want to use. There are 3 outputs: raw output, sprint to
-            priority output, and sprint to section output.
+            Copy the CSV output. This will copy 3 tables: the first one being the data, the second
+            is the matrix between sprint and ticket priorities, the third is the matrix between
+            sprint and sections affected.
           </li>
         </ol>
       </section>
@@ -136,19 +137,19 @@ export function JiraForm() {
       <section className="flex flex-col gap-y-4">
         <h2 className="text-xl font-semibold">Output</h2>
 
-        <OutputSection title="Raw" content={csvOutput.value.content} />
+        <div className="flex gap-x-2">
+          <CopyButton content={csvOutput.value.content}>Copy CSV tables</CopyButton>
 
-        <OutputSection
-          title="Sprint to priority"
-          content={csvOutput.value.csvSprintToPriorityRecord}
-          formula={csvOutput.value.csvSprintToPriorityFormula}
-        />
+          <CopyButton content={csvOutput.value.csvSprintToPriorityFormula}>
+            Copy sprint/priority formula
+          </CopyButton>
 
-        <OutputSection
-          title="Sprint to section"
-          content={csvOutput.value.csvSprintToSectionRecord}
-          formula={csvOutput.value.csvSprintToSectionFormula}
-        />
+          <CopyButton content={csvOutput.value.csvSprintToSectionFormula}>
+            Copy sprint/section formula
+          </CopyButton>
+        </div>
+
+        <pre className="border p-2 pb-1 text-sm line-clamp-4">{csvOutput.value.content}</pre>
       </section>
     </div>
   )
@@ -199,10 +200,14 @@ function processOutput(input: string) {
   const sprintCsvColumn = getCsvColumnLetter(keys, sprintKeyInput.value)
   const sectionCsvColumn = getCsvColumnLetter(keys, sectionKeyInput.value)
 
-  csvOutput.value = {
-    content: stringify(content, { header: true }),
+  const csvContent = [
+    stringify(content, { header: true }).trim(),
+    renderPriorityCsv(sprintKeys),
+    renderSectionCsv(sectionKeys, sprintKeys)
+  ].join('\n\n')
 
-    csvSprintToPriorityRecord: renderPriorityCsv(sprintKeys),
+  csvOutput.value = {
+    content: csvContent,
 
     csvSprintToPriorityFormula: getFormula({
       column: priorityCsvColumn,
@@ -210,8 +215,6 @@ function processOutput(input: string) {
       sprintCsvColumn,
       startRow: priorityRowStart
     }),
-
-    csvSprintToSectionRecord: renderSectionCsv(sectionKeys, sprintKeys),
 
     csvSprintToSectionFormula: getFormula({
       column: sectionCsvColumn,
@@ -221,32 +224,6 @@ function processOutput(input: string) {
       isMultiple: true
     })
   }
-}
-
-function OutputSection({
-  title,
-  content,
-  formula
-}: {
-  title: string
-  content: string
-  formula?: string
-}) {
-  return (
-    <section className="flex flex-col gap-y-2">
-      <h3 className="text-base font-semibold flex gap-x-2 items-center">{title}</h3>
-
-      <div className="flex gap-x-2">
-        <CopyButton content={content}>Copy CSV table</CopyButton>
-
-        {formula && <CopyButton content={formula}>Copy formula</CopyButton>}
-      </div>
-
-      <pre className="border p-2 pb-1 text-sm line-clamp-4">{content}</pre>
-
-      {formula && <pre className="border p-2 text-sm">{formula}</pre>}
-    </section>
-  )
 }
 
 function CopyButton({ children, content }: { children: ReactNode; content: string }) {
