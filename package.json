@@ -22,12 +22,14 @@
     "astro": "4.11.5",
     "csv-parse": "5.5.6",
     "csv-stringify": "6.5.0",
+    "js-yaml": "4.1.0",
     "lodash": "4.17.21",
     "preact": "10.22.1",
     "tailwindcss": "3.4.4",
     "typescript": "5.5.3"
   },
   "devDependencies": {
+    "@types/js-yaml": "4.0.9",
     "@types/lodash": "4.17.6",
     "prettier": "3.3.2"
   }
