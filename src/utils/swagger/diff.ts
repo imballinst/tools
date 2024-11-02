@@ -80,25 +80,29 @@ export function addMethodsDiffToResult(
       const newOperation = newMethodRecord[combinedMethodKey]
 
       // Check the query parameters.
-      const parameterDiffs = extractParameterDiffs(
-        combinedMethodKey,
+      const parameterDiffs = extractParameterDiffs({
+        method: combinedMethodKey,
         endpointPath,
         oldOperation,
         newOperation
-      )
+      })
 
       // Check the response.
     }
   }
 }
 
-// TODO: next objective is test this small function first.
-export function extractParameterDiffs(
-  method: string,
-  endpointPath: string,
-  oldOperation: OpenAPIV3.OperationObject,
+export function extractParameterDiffs({
+  method,
+  endpointPath,
+  oldOperation,
+  newOperation
+}: {
+  method: string
+  endpointPath: string
+  oldOperation: OpenAPIV3.OperationObject
   newOperation: OpenAPIV3.OperationObject
-): Result {
+}): Result {
   const result = getInitialResult()
 
   const oldParameterRecord = convertOperationParametersToRecord(oldOperation.parameters)
@@ -165,6 +169,26 @@ export function extractParameterDiffs(
       }
     }
   }
+
+  return result
+}
+
+export function extractResponseDiffs({
+  method,
+  endpointPath,
+  oldOperation,
+  newOperation,
+  components
+}: {
+  method: string
+  endpointPath: string
+  oldOperation: OpenAPIV3.OperationObject
+  newOperation: OpenAPIV3.OperationObject
+  components: OpenAPIV3.ComponentsObject
+}): Result {
+  const result = getInitialResult()
+
+  // TODO:
 
   return result
 }

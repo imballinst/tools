@@ -6,12 +6,12 @@ describe('extractParameterDiffs', () => {
   const ENDPOINT_PATH = '/hello/world'
 
   test('no changes', () => {
-    const result = extractParameterDiffs(
-      METHOD,
-      ENDPOINT_PATH,
-      { responses: {}, parameters: [] },
-      { responses: {}, parameters: [] }
-    )
+    const result = extractParameterDiffs({
+      method: METHOD,
+      endpointPath: ENDPOINT_PATH,
+      oldOperation: { responses: {}, parameters: [] },
+      newOperation: { responses: {}, parameters: [] }
+    })
 
     expect(result.endpoints.added.size).toBe(0)
     expect(result.endpoints.breaking.size).toBe(0)
@@ -25,10 +25,10 @@ describe('extractParameterDiffs', () => {
   })
 
   test('breaking parameter: name change', () => {
-    const result = extractParameterDiffs(
-      METHOD,
-      ENDPOINT_PATH,
-      {
+    const result = extractParameterDiffs({
+      method: METHOD,
+      endpointPath: ENDPOINT_PATH,
+      oldOperation: {
         responses: {},
         parameters: [
           {
@@ -40,7 +40,7 @@ describe('extractParameterDiffs', () => {
           }
         ]
       },
-      {
+      newOperation: {
         responses: {},
         parameters: [
           {
@@ -52,7 +52,7 @@ describe('extractParameterDiffs', () => {
           }
         ]
       }
-    )
+    })
 
     expect(result.endpoints.added.size).toBe(0)
     // Dev's note: userId is removed and userId2 is added.
@@ -67,10 +67,10 @@ describe('extractParameterDiffs', () => {
   })
 
   test('breaking parameter: schema change', () => {
-    const result = extractParameterDiffs(
-      METHOD,
-      ENDPOINT_PATH,
-      {
+    const result = extractParameterDiffs({
+      method: METHOD,
+      endpointPath: ENDPOINT_PATH,
+      oldOperation: {
         responses: {},
         parameters: [
           {
@@ -82,7 +82,7 @@ describe('extractParameterDiffs', () => {
           }
         ]
       },
-      {
+      newOperation: {
         responses: {},
         parameters: [
           {
@@ -94,7 +94,7 @@ describe('extractParameterDiffs', () => {
           }
         ]
       }
-    )
+    })
 
     expect(result.endpoints.added.size).toBe(0)
     expect(result.endpoints.breaking.size).toBe(1)
@@ -108,10 +108,10 @@ describe('extractParameterDiffs', () => {
   })
 
   test('breaking parameter: location change', () => {
-    const result = extractParameterDiffs(
-      METHOD,
-      ENDPOINT_PATH,
-      {
+    const result = extractParameterDiffs({
+      method: METHOD,
+      endpointPath: ENDPOINT_PATH,
+      oldOperation: {
         responses: {},
         parameters: [
           {
@@ -123,7 +123,7 @@ describe('extractParameterDiffs', () => {
           }
         ]
       },
-      {
+      newOperation: {
         responses: {},
         parameters: [
           {
@@ -135,7 +135,7 @@ describe('extractParameterDiffs', () => {
           }
         ]
       }
-    )
+    })
 
     expect(result.endpoints.added.size).toBe(0)
     expect(result.endpoints.breaking.size).toBe(1)
@@ -149,10 +149,10 @@ describe('extractParameterDiffs', () => {
   })
 
   test('new parameter: cookie', () => {
-    const result = extractParameterDiffs(
-      METHOD,
-      ENDPOINT_PATH,
-      {
+    const result = extractParameterDiffs({
+      method: METHOD,
+      endpointPath: ENDPOINT_PATH,
+      oldOperation: {
         responses: {},
         parameters: [
           {
@@ -164,7 +164,7 @@ describe('extractParameterDiffs', () => {
           }
         ]
       },
-      {
+      newOperation: {
         responses: {},
         parameters: [
           {
@@ -183,7 +183,7 @@ describe('extractParameterDiffs', () => {
           }
         ]
       }
-    )
+    })
 
     expect(result.endpoints.added.size).toBe(0)
     expect(result.endpoints.breaking.size).toBe(0)
@@ -197,10 +197,10 @@ describe('extractParameterDiffs', () => {
   })
 
   test('new parameter: header', () => {
-    const result = extractParameterDiffs(
-      METHOD,
-      ENDPOINT_PATH,
-      {
+    const result = extractParameterDiffs({
+      method: METHOD,
+      endpointPath: ENDPOINT_PATH,
+      oldOperation: {
         responses: {},
         parameters: [
           {
@@ -212,7 +212,7 @@ describe('extractParameterDiffs', () => {
           }
         ]
       },
-      {
+      newOperation: {
         responses: {},
         parameters: [
           {
@@ -231,7 +231,7 @@ describe('extractParameterDiffs', () => {
           }
         ]
       }
-    )
+    })
 
     expect(result.endpoints.added.size).toBe(0)
     expect(result.endpoints.breaking.size).toBe(0)
@@ -245,10 +245,10 @@ describe('extractParameterDiffs', () => {
   })
 
   test('new parameter: query', () => {
-    const result = extractParameterDiffs(
-      METHOD,
-      ENDPOINT_PATH,
-      {
+    const result = extractParameterDiffs({
+      method: METHOD,
+      endpointPath: ENDPOINT_PATH,
+      oldOperation: {
         responses: {},
         parameters: [
           {
@@ -260,7 +260,7 @@ describe('extractParameterDiffs', () => {
           }
         ]
       },
-      {
+      newOperation: {
         responses: {},
         parameters: [
           {
@@ -279,7 +279,7 @@ describe('extractParameterDiffs', () => {
           }
         ]
       }
-    )
+    })
 
     expect(result.endpoints.added.size).toBe(0)
     expect(result.endpoints.breaking.size).toBe(0)
