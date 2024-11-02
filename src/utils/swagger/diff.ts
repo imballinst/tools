@@ -1,4 +1,5 @@
 import { OpenAPIV3 } from 'openapi-types'
+import isEqual from 'lodash/isEqual'
 
 const DEFINITIONS_KEY = 'definitions'
 const PATHS_KEY = 'paths'
@@ -93,7 +94,7 @@ export function addMethodsDiffToResult(
 
 // TODO: next objective is test this small function first.
 export function extractParameterDiffs(
-  combinedMethodKey: string,
+  method: string,
   endpointPath: string,
   oldOperation: OpenAPIV3.OperationObject,
   newOperation: OpenAPIV3.OperationObject
@@ -108,8 +109,8 @@ export function extractParameterDiffs(
 
   for (const combinedParameterKey of combinedParameterKeys) {
     // Handle weird cases where path and query names might be the same.
-    const oldParameterByInRecord = oldParameterRecord[combinedParameterKey]
-    const newParameterByInRecord = newParameterRecord[combinedParameterKey]
+    const oldParameterByInRecord = oldParameterRecord[combinedParameterKey] ?? {}
+    const newParameterByInRecord = newParameterRecord[combinedParameterKey] ?? {}
 
     const oldParameterIns = Object.keys(oldParameterByInRecord)
     const newParameterIns = Object.keys(newParameterByInRecord)
@@ -122,24 +123,45 @@ export function extractParameterDiffs(
       const isOldParameterInExist = oldParameterByIn !== undefined
       const isNewParameterInExist = newParameterByIn !== undefined
 
-      const labels = [combinedMethodKey, endpointPath]
+      const labels = [method, endpointPath]
 
       if (!isNewParameterInExist && isOldParameterInExist) {
         result.endpoints.breaking.add(
-          generateDiffMessage(
-            labels,
-            `${oldParameterByIn.in} parameter ${oldParameterByIn.name} has been removed`
-          )
+          generateDiffMessage(labels, `${oldParameterByIn.in} parameter has been removed`)
         )
       } else if (isNewParameterInExist && !isOldParameterInExist) {
-        result.endpoints.added.add(
-          generateDiffMessage(
-            labels,
-            `${newParameterByIn.in} parameter ${newParameterByIn.name} has been added`
+        if (newParameterByIn.required) {
+          result.endpoints.breaking.add(
+            generateDiffMessage(labels, `${newParameterByIn.in} required parameter has been added`)
           )
-        )
+        } else if (newParameterByIn.in === 'path') {
+          result.endpoints.breaking.add(
+            generateDiffMessage(
+              labels,
+              `${newParameterByIn.in} parameter has been added, which should not be possible`
+            )
+          )
+        } else {
+          result.endpoints.updated.add(
+            generateDiffMessage(labels, `${newParameterByIn.in} parameter has been added`)
+          )
+        }
       } else if (isNewParameterInExist && isOldParameterInExist) {
-        // TODO.
+        if (oldParameterByIn.in !== newParameterByIn.in) {
+          result.endpoints.breaking.add(
+            generateDiffMessage(
+              labels,
+              `${newParameterByIn.in} parameter location changes from ${oldParameterByIn.in} to ${newParameterByIn.in}`
+            )
+          )
+        } else if (!isEqual(oldParameterByIn.schema, newParameterByIn.schema)) {
+          result.endpoints.breaking.add(
+            generateDiffMessage(
+              labels,
+              `${newParameterByIn.name} schema is different than the previous one`
+            )
+          )
+        }
       }
     }
   }
